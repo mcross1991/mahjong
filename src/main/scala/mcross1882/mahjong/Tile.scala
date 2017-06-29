@@ -14,9 +14,9 @@ object Tile {
 
     def startingTiles(): ArrayBuffer[Tile] = {
         val buffer = new ArrayBuffer[Tile]
-        buffer ++= Seq.fill(4)(Tile("红中", ""))
-        buffer ++= Seq.fill(4)(Tile("青发", ""))
-        buffer ++= Seq.fill(4)(Tile("白板", ""))
+        buffer ++= Seq.fill(4)(Tile("中", "红"))
+        buffer ++= Seq.fill(4)(Tile("发", "青"))
+        buffer ++= Seq.fill(4)(Tile("板", "白"))
         tileRange("条", numerals, buffer)
         tileRange("万", numerals, buffer)
         tileRange("筒", numerals, buffer)
