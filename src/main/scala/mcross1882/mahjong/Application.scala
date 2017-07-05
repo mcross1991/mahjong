@@ -1,6 +1,7 @@
 package mcross1882.mahjong
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.StdIn
 
 object Application {
 
@@ -8,19 +9,42 @@ object Application {
 
         val game = new Game
 
-        val screen = new ConsoleScreen
+        val factory = new CommandFactory(game)
 
-        val player = new Player("demo")
+        val players = Seq(
+            new Player("Player A"),
+            new Bot("Player B"),
+            new Bot("Player C"),
+            new Bot("Player D")
+        )
 
         val commands = new ArrayBuffer[Command]
 
-        commands ++= dealStartingTiles(player)
+        for (player <- players) {
+            commands ++= dealStartingTiles(player)
+        }
 
         for (command <- commands) {
             command.execute(game)
         }
 
-        screen.renderPlayerTiles(player)
+
+        var line: String = ""
+        while (!game.isFinished) {
+            for (player <- players) {
+                line = player match {
+                    case p: NPC => p.getNextMove
+                    case p: Player => StdIn.readLine(s"${player.name}> ")
+                } 
+
+                if ("exit" == line) {
+                    return
+                }
+
+                val command = factory.create(player, line)
+                command.execute(game)
+            }
+        }
     }
 
     private def dealStartingTiles(player: Player): Seq[DealTile] = List.fill(13)(new DealTile(player))

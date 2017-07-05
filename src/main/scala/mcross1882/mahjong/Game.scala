@@ -10,6 +10,10 @@ class Game {
 
     private val discardedTiles = new TileBuffer
 
+    private var currentPlayer: String = ""
+
+    private var isGameFinished: Boolean = false
+
     def dealTile(): Tile = {
         val tile = availableTiles.head
         availableTiles -= tile
@@ -20,21 +24,21 @@ class Game {
         discardedTiles += tile
     }
 
-    def isPung(tiles: Seq[Tile]): Boolean = isMatchingSet(tiles, 3)
+    def setCurrentPlayer(player: Player) {
+        currentPlayer = player.name
+    }
 
-    def isKong(tiles: Seq[Tile]): Boolean = isMatchingSet(tiles, 4)
+    def isCurrentPlayer(player: Player): Boolean = player.name == currentPlayer
 
-    private def isMatchingSet(tiles: Seq[Tile], requiredCount: Int): Boolean = {
-        if (tiles.length != requiredCount) {
-            return false
-        }
+    def lastDiscardedTile(): Tile = discardedTiles.last
 
-        val firstTile = tiles.head
-        for (index <- 1 until tiles.length) {
-            if (firstTile != tiles(index)) {
-                return false
-            }
-        }
-        true
+    def isFinished(): Boolean = isGameFinished
+
+    def finish() {
+        isGameFinished = true
+    }
+
+    def reset() {
+        isGameFinished = false
     }
 }
