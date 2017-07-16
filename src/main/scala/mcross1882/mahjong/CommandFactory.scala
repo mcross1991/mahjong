@@ -2,27 +2,28 @@ package mcross1882.mahjong
 
 class InvalidCommandException extends Exception("Invalid command given")
 
-class CommandFactory(game: Game) {
+class CommandFactory {
 
     def create(player: Player, line: String): Command = {
-        line.toLowerCase.trim.split(" ") match {
-            case Array("pung", tileA, tileB, tileC) => new CallPung(player, findTiles(player, tileA, tileB, tileC))
-            case Array("kong", tileA, tileB, tileC, tileD) => new CallKong(player, findTiles(player, tileA, tileB, tileC, tileD))
-            case Array("show") => new ShowTiles(player)
-            case Array("last") => new LastDiscardedTile(player)
-            case Array("discard", index) => new DiscardTile(player, index.toInt)
-            case Array("deal") => new DealTile(player)
+        cleanInput(line) match {
+            case Array("pung", tileA, tileB, tileC) => CallPung(player, findTiles(player, tileA, tileB, tileC))
+            case Array("kong", tileA, tileB, tileC, tileD) => CallKong(player, findTiles(player, tileA, tileB, tileC, tileD))
+            case Array("chow", tileA, tileB, tileC) => CallChow(player, findTiles(player, tileA, tileB, tileC))
+            case Array("show") => ShowTiles(player, player.tiles, false)
+            case Array("show", "groups") => ShowTiles(player, player.groupedTiles(None).flatMap(x => x.sortBy(_.intValue)), true)
+            case Array("show", "score") => ShowScore(player)
+            case Array("last") => LastDiscardedTile(player)
+            case Array("discard", index) => DiscardTile(player, index.toInt)
+            case Array("exit") => ExitGame()
             case _ => throw new InvalidCommandException()
         }
     }
 
+    private def cleanInput(line: String): Array[String] = line.toLowerCase.trim.split(" ")
+
     private def findTiles(player: Player, indices: String*): Seq[Tile] = {
         indices.map{ x =>
-            if ("last" == x) {
-                game.lastDiscardedTile
-            } else {
-                player.tiles(x.toInt)
-            }
+            player.tiles(x.toInt)
         }
     }
 }

@@ -10,9 +10,11 @@ class Game {
 
     private val discardedTiles = new TileBuffer
 
-    private var currentPlayer: String = ""
+    private var currentPlayer: Option[Player] = None
 
     private var isGameFinished: Boolean = false
+
+    private var isWaiting: Boolean = false
 
     def dealTile(): Tile = {
         val tile = availableTiles.head
@@ -25,20 +27,27 @@ class Game {
     }
 
     def setCurrentPlayer(player: Player) {
-        currentPlayer = player.name
+        currentPlayer = Some(player)
+        isWaiting = true
     }
 
-    def isCurrentPlayer(player: Player): Boolean = player.name == currentPlayer
+    def isWaitingForPlayer(): Boolean = isWaiting
 
-    def lastDiscardedTile(): Tile = discardedTiles.last
+    def stopWaiting() {
+        isWaiting = false
+    }
+
+    def lastDiscardedTile(): Option[Tile] = discardedTiles.lastOption
 
     def isFinished(): Boolean = isGameFinished
 
     def finish() {
         isGameFinished = true
+        isWaiting = false
     }
 
     def reset() {
         isGameFinished = false
+        isWaiting = false
     }
 }
