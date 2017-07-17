@@ -81,7 +81,7 @@ case class ShowScore(player: Player) extends Command {
         if (list.length > 0) {
             println(s"${setName.capitalize}s (${list.length})")
             for (item <- list) {
-                (new ShowTiles(player, item, true)).execute(game)
+                ShowTiles(player, item, true).execute(game)
             }
         } else {
             println(s"No ${setName}s")
@@ -122,47 +122,15 @@ case class LastDiscardedTile(player: Player) extends Command {
     }
 }
 
-trait MatchingTileFinder {
-
-    protected def isMatchingSet(tiles: Seq[Tile], requiredCount: Int): Boolean = {
-        if (tiles.length != requiredCount) {
-            return false
-        }
-
-        val firstTile = tiles.head
-        for (index <- 1 until tiles.length) {
-            if (firstTile != tiles(index)) {
-                return false
-            }
-        }
-        true
-    }
-
-    protected def isLinearSet(tiles: Seq[Tile], requiredCount: Int): Boolean = {
-        if (tiles.length != requiredCount) {
-            return false
-        }
-
-        var currentValue = tiles.head.intValue
-        for (index <- 1 until tiles.length) {
-            if (currentValue != (tiles(index).intValue - 1)) {
-                 return false
-            }
-            currentValue = tiles(index).intValue
-        }
-        true
-    }
-}
-
 case class CallPung(player: Player, selectedTiles: Seq[Tile]) extends Command with MatchingTileFinder  {
 
     def execute(game: Game) {
         if (isPung(selectedTiles)) {
-            println("Pung")
+            println(s"${player.name} calls pung! (${selectedTiles.mkString(",")})")
             player.score.pungs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
-            (new DealTile(player)).execute(game)
+            DealTile(player).execute(game)
         } else {
             println("Combination is not a pung")
         }
@@ -175,11 +143,11 @@ case class CallKong(player: Player, selectedTiles: Seq[Tile]) extends Command wi
 
     def execute(game: Game) {
         if (isKong(selectedTiles)) {
-            println("Kong")
+            println(s"${player.name} calls kong! (${selectedTiles.mkString(",")})")
             player.score.kongs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
-            (new DealTile(player)).execute(game)
+            DealTile(player).execute(game)
         } else {
             println("Combination is not a kong")
         }
@@ -192,11 +160,11 @@ case class CallChow(player: Player, selectedTiles: Seq[Tile]) extends Command wi
 
     def execute(game: Game) {
         if (isChow(selectedTiles)) {
-            println("Chow")
+            println(s"${player.name} calls chow! (${selectedTiles.mkString(",")})")
             player.score.chows += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
-            (new DealTile(player)).execute(game)
+            DealTile(player).execute(game)
         } else {
             println("Combination is not a chow")
         }

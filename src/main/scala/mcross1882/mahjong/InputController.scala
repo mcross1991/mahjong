@@ -4,26 +4,26 @@ import scala.io.StdIn
 
 trait InputController {
 
-    def requestNextCommand(player: Player, game: Game): Command
+    def requestNextCommand(player: Player): Command
 
-    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]], game: Game): Command
+    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command
 }
 
 
 class ConsoleController(factory: CommandFactory) extends InputController {
 
-    def requestNextCommand(player: Player, game: Game): Command = {
-        factory.create(player, game, StdIn.readLine(s"${player.name}> ")) match {
+    def requestNextCommand(player: Player): Command = {
+        factory.create(player, StdIn.readLine(s"${player.name}> ")) match {
             case Some(p) => p
-            case None => requestNextCommand(player, game)
+            case None => requestNextCommand(player)
         }
     }
 
-    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]], game: Game): Command = {
-        factory.create(player, game, StdIn.readLine(s"${player.name}> ")) match {
-            case Some(p: DiscardTile) => requestCallCommand(player, groupedTiles, game)
+    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command = {
+        factory.create(player, StdIn.readLine(s"${player.name}> ")) match {
+            case Some(p: DiscardTile) => requestCallCommand(player, groupedTiles)
             case Some(p) => p
-            case None => requestCallCommand(player, groupedTiles, game)
+            case None => requestCallCommand(player, groupedTiles)
         }
     }
 }
@@ -32,7 +32,7 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
 
     type TileGroups = Seq[Seq[Tile]]
 
-    def requestNextCommand(player: Player, game: Game): Command = {
+    def requestNextCommand(player: Player): Command = {
         val groups = player.groupedTiles
         findKongs(groups) match {
             case Some(list) => return CallKong(player, list)
@@ -49,10 +49,10 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
             case None => // noop
         }
 
-        DiscardTile(player, findSmallestTile(groups))
+        DiscardTile(player, findSmallestTile(player, groups))
     }
 
-    def requestCallCommand(player: Player, groups: Seq[Seq[Tile]], game: Game): Command = {
+    def requestCallCommand(player: Player, groups: TileGroups): Command = {
         findKongs(groups) match {
             case Some(list) => return CallKong(player, list)
             case None => // noop
@@ -71,28 +71,29 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
         SkipCommand()
     }
 
-    private def findPungs(groups: TileGroups): Option[Seq[Tile]] = {
-        groups.filter(x => x.length == 3 && isMatchingSet(x, 3)).headOption
+    private def findKongs(groups: TileGroups): Option[Seq[Tile]] = {
+        groups.map(x => extractMatchingSet(x, 4)).filter(!_.isEmpty).headOption
     }
 
-    private def findKongs(groups: TileGroups): Option[Seq[Tile]] = {
-        groups.filter(x => x.length == 4 && isMatchingSet(x, 4)).headOption
+    private def findPungs(groups: TileGroups): Option[Seq[Tile]] = {
+        groups.map(x => extractMatchingSet(x, 3)).filter(!_.isEmpty).headOption
     }
 
     private def findChows(groups: TileGroups): Option[Seq[Tile]] = {
-        groups.filter(x => x.length == 3 && isLinearSet(x, 3)).headOption
+        groups.map(x => extractLinearSet(x, 3)).filter(!_.isEmpty).headOption
     }
 
-    private def findSmallestTile(groups: TileGroups): Int = {
-        var smallestTileIndex: Int = 0
+    private def findSmallestTile(player: Player, groups: TileGroups): Int = {
+        var smallestTile: Tile = groups.head.head
         var smallestValue: Int = 4        
         for (index <- 0 until groups.length) {
             if (groups(index).length < smallestValue) {
-                smallestTileIndex = index
+                smallestTile = groups(index).head
                 smallestValue = groups(index).length
             }
         }
-        smallestTileIndex
+
+        player.tileIndex(smallestTile)
     }
 }
 

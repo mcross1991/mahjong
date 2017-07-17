@@ -17,6 +17,10 @@ class Game {
     private var isWaiting: Boolean = false
 
     def dealTile(): Tile = {
+        if (availableTiles.isEmpty) {
+            throw new Exception("No more tiles!")
+        }
+
         val tile = availableTiles.head
         availableTiles -= tile
         tile

@@ -17,6 +17,10 @@ case class Player(name: String, score: Score, controller: InputController) {
 
     private val tileBuffer = new ArrayBuffer[Tile]
 
+    def canCallMahjong(): Boolean = {
+        tileBuffer.isEmpty || (tileBuffer.length == 2 && tileBuffer(0) == tileBuffer(1))
+    }
+
     def takeTile(tile: Tile) {
         tileBuffer += tile
     }
@@ -35,17 +39,19 @@ case class Player(name: String, score: Score, controller: InputController) {
 
     def tiles(index: Int): Tile = tileBuffer(index)
 
+    def tileIndex(tile: Tile): Int = tileBuffer.indexOf(tile)
+
     def groupedTiles(): Seq[Seq[Tile]] = {
         tileBuffer.groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
     }
 
-    def nextCommand(game: Game): Command = {
-        controller.requestNextCommand(this, game)
+    def nextCommand(): Command = {
+        controller.requestNextCommand(this)
     }
 
-    def checkLastTile(game: Game, lastTile: Tile): Command = {
+    def checkLastTile(lastTile: Tile): Command = {
         val grouped = (tiles ++ Seq(lastTile)).groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
-        controller.requestCallCommand(this, grouped, game)
+        controller.requestCallCommand(this, grouped)
     }
 }
 
