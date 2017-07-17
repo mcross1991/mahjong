@@ -4,37 +4,14 @@ import scala.collection.mutable.ArrayBuffer
 
 object Player {
 
-    def create(name: String, factory: CommandFactory): Player = Player(name, new Score, new ConsoleController(factory))
+    def create(name: String, factory: CommandFactory): Player = Player(name, createScore, new ConsoleController(factory))
 
-    def createBot(name: String, factory: CommandFactory): Player = Player(name, new Score, new BotController(factory))
+    def createBot(name: String, factory: CommandFactory): Player = Player(name, createScore, new BotController(factory))
+
+    def createScore(): Score = new Score(new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]])
 }
 
-class Score {
-
-    private val kongs = new ArrayBuffer[Seq[Tile]]
-
-    private val pungs = new ArrayBuffer[Seq[Tile]]
-
-    private val chows = new ArrayBuffer[Seq[Tile]]
-
-    def addKong(kong: Seq[Tile]) {
-        kongs += kong
-    }
-
-    def addPung(pung: Seq[Tile]) {
-        pungs += pung
-    }
-
-    def addChow(chow: Seq[Tile]) {
-        chows += chow
-    }
-
-    def listKongs(): Seq[Seq[Tile]] = kongs.toSeq
-
-    def listPungs(): Seq[Seq[Tile]] = pungs.toSeq
-
-    def listChows(): Seq[Seq[Tile]] = chows.toSeq
-}
+case class Score(kongs: ArrayBuffer[Seq[Tile]], pungs: ArrayBuffer[Seq[Tile]], chows: ArrayBuffer[Seq[Tile]])
 
 case class Player(name: String, score: Score, controller: InputController) {
 
@@ -58,12 +35,17 @@ case class Player(name: String, score: Score, controller: InputController) {
 
     def tiles(index: Int): Tile = tileBuffer(index)
 
-    def groupedTiles(lastDiscardedTile: Option[Tile]): Seq[Seq[Tile]] = {
-        tiles.groupBy(_.category).values.toSeq
+    def groupedTiles(): Seq[Seq[Tile]] = {
+        tileBuffer.groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
     }
 
-    def nextCommand(): Command = {
-        controller.listenForCommand(this)
+    def nextCommand(game: Game): Command = {
+        controller.requestNextCommand(this, game)
+    }
+
+    def checkLastTile(game: Game, lastTile: Tile): Command = {
+        val grouped = (tiles ++ Seq(lastTile)).groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
+        controller.requestCallCommand(this, grouped, game)
     }
 }
 

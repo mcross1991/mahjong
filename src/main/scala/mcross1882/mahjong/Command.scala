@@ -5,7 +5,14 @@ trait Command {
     def execute(game: Game)
 }
 
-case class ExitGame() extends Command {
+case class SkipCommand() extends Command {
+
+    def execute(game: Game) {
+        game.stopWaiting
+    }
+}
+
+case object ExitGame extends Command {
 
     def execute(game: Game) {
         game.finish
@@ -62,17 +69,17 @@ case class ShowScore(player: Player) extends Command {
         println(header)
         println("-" * header.length)
         println
-        listScoreTiles(game, "kong", player.score.listKongs)
+        listScoreTiles(game, "kong", player.score.kongs)
         println
-        listScoreTiles(game, "pung", player.score.listPungs)
+        listScoreTiles(game, "pung", player.score.pungs)
         println
-        listScoreTiles(game, "chow", player.score.listChows)
+        listScoreTiles(game, "chow", player.score.chows)
         println
     }
 
     private def listScoreTiles(game: Game, setName: String, list: Seq[Seq[Tile]]) {
         if (list.length > 0) {
-            println(s"${setName.capitalize} (${list.length})")
+            println(s"${setName.capitalize}s (${list.length})")
             for (item <- list) {
                 (new ShowTiles(player, item, true)).execute(game)
             }
@@ -105,8 +112,13 @@ case class DiscardTile(player: Player, tileIndex: Int) extends Command {
 case class LastDiscardedTile(player: Player) extends Command {
 
     def execute(game: Game) {
-        val tile = game.lastDiscardedTile
-        println(s"${player.name} discarded $tile")
+        game.lastDiscardedTile match {
+            case Some(tile) => {
+                println(s"Last discarded tile was")
+                (new ShowTiles(player, Seq(tile), true)).execute(game)
+            }
+            case None => println("No tile has been discard yet")
+        }
     }
 }
 
@@ -147,7 +159,7 @@ case class CallPung(player: Player, selectedTiles: Seq[Tile]) extends Command wi
     def execute(game: Game) {
         if (isPung(selectedTiles)) {
             println("Pung")
-            player.score.addPung(selectedTiles)
+            player.score.pungs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             (new DealTile(player)).execute(game)
@@ -164,7 +176,7 @@ case class CallKong(player: Player, selectedTiles: Seq[Tile]) extends Command wi
     def execute(game: Game) {
         if (isKong(selectedTiles)) {
             println("Kong")
-            player.score.addKong(selectedTiles)
+            player.score.kongs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             (new DealTile(player)).execute(game)
@@ -181,7 +193,7 @@ case class CallChow(player: Player, selectedTiles: Seq[Tile]) extends Command wi
     def execute(game: Game) {
         if (isChow(selectedTiles)) {
             println("Chow")
-            player.score.addChow(selectedTiles)
+            player.score.chows += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             (new DealTile(player)).execute(game)

@@ -33,8 +33,18 @@ object Application {
 
                 (new DealTile(player)).execute(game)
                 while (game.isWaitingForPlayer()) {
-                    val command = player.nextCommand
+                    val command = player.nextCommand(game)
                     command.execute(game)
+                }
+
+                for (player <- players) {
+                    game.lastDiscardedTile match {
+                        case Some(tile) => {
+                            val command = player.checkLastTile(game, tile)
+                            command.execute(game)
+                        }
+                        case None => // noop
+                    }
                 }
             }
         }

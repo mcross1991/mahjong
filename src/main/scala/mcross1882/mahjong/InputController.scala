@@ -4,14 +4,27 @@ import scala.io.StdIn
 
 trait InputController {
 
-    def listenForCommand(player: Player): Command
+    def requestNextCommand(player: Player, game: Game): Command
+
+    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]], game: Game): Command
 }
 
 
 class ConsoleController(factory: CommandFactory) extends InputController {
 
-    def listenForCommand(player: Player): Command = {
-        factory.create(player, StdIn.readLine(s"${player.name}> "))
+    def requestNextCommand(player: Player, game: Game): Command = {
+        factory.create(player, game, StdIn.readLine(s"${player.name}> ")) match {
+            case Some(p) => p
+            case None => requestNextCommand(player, game)
+        }
+    }
+
+    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]], game: Game): Command = {
+        factory.create(player, game, StdIn.readLine(s"${player.name}> ")) match {
+            case Some(p: DiscardTile) => requestCallCommand(player, groupedTiles, game)
+            case Some(p) => p
+            case None => requestCallCommand(player, groupedTiles, game)
+        }
     }
 }
 
@@ -19,8 +32,8 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
 
     type TileGroups = Seq[Seq[Tile]]
 
-    def listenForCommand(player: Player): Command = {
-        val groups = player.groupedTiles(None)
+    def requestNextCommand(player: Player, game: Game): Command = {
+        val groups = player.groupedTiles
         findKongs(groups) match {
             case Some(list) => return CallKong(player, list)
             case None => // noop
@@ -36,8 +49,26 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
             case None => // noop
         }
 
-        val tileIndex = findSmallestTile(groups)
-        new DiscardTile(player, tileIndex)
+        DiscardTile(player, findSmallestTile(groups))
+    }
+
+    def requestCallCommand(player: Player, groups: Seq[Seq[Tile]], game: Game): Command = {
+        findKongs(groups) match {
+            case Some(list) => return CallKong(player, list)
+            case None => // noop
+        }
+
+        findPungs(groups) match {
+            case Some(list) => return CallPung(player, list)
+            case None => // noop
+        }
+
+        findChows(groups) match {
+            case Some(list) => return CallChow(player, list)
+            case None => // noop
+        }
+
+        SkipCommand()
     }
 
     private def findPungs(groups: TileGroups): Option[Seq[Tile]] = {
