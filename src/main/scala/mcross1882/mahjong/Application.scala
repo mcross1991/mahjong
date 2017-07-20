@@ -28,7 +28,7 @@ class Session {
         val factory = new CommandFactory
 
         val players: Seq[Player] = Seq(
-            Player.createBot("Player A", factory),
+            Player.createRemote("Player A", factory),
             Player.createBot("Player B", factory),
             Player.createBot("Player C", factory),
             Player.createBot("Player D", factory)

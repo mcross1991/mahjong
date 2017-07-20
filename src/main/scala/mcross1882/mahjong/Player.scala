@@ -6,6 +6,8 @@ object Player {
 
     def create(name: String, factory: CommandFactory): Player = Player(name, createScore, new ConsoleController(factory))
 
+    def createRemote(name: String, factory: CommandFactory): Player = Player(name, createScore, new SocketController(factory))
+
     def createBot(name: String, factory: CommandFactory): Player = Player(name, createScore, new BotController(factory))
 
     def createScore(): Score = new Score(new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]])
@@ -52,6 +54,10 @@ case class Player(name: String, score: Score, controller: InputController) {
     def checkLastTile(lastTile: Tile): Command = {
         val grouped = (tiles ++ Seq(lastTile)).groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
         controller.requestCallCommand(this, grouped)
+    }
+
+    def renderOutput(message: String) {
+        controller.renderOutput(this, message)
     }
 }
 

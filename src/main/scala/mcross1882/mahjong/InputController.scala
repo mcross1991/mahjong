@@ -1,12 +1,16 @@
 package mcross1882.mahjong
 
 import scala.io.StdIn
+import java.io.{InputStreamReader, BufferedReader, PrintWriter}
+import java.net.{ServerSocket, Socket}
 
 trait InputController {
 
     def requestNextCommand(player: Player): Command
 
     def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command
+
+    def renderOutput(player: Player, message: String)
 }
 
 
@@ -25,6 +29,43 @@ class ConsoleController(factory: CommandFactory) extends InputController {
             case Some(p) => p
             case None => requestCallCommand(player, groupedTiles)
         }
+    }
+
+    def renderOutput(player: Player, message: String) {
+        print(message)
+    }
+}
+
+class SocketController(factory: CommandFactory) extends InputController {
+
+    private val server = new ServerSocket(8888)
+
+    private val socket: Socket = server.accept
+
+    private val reader: BufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream))
+
+    private val writer: PrintWriter = new PrintWriter(socket.getOutputStream)
+
+    def requestNextCommand(player: Player): Command = {
+        println(s"Waiting for ${player.name}")
+        factory.create(player, reader.readLine) match {
+            case Some(command) => command
+            case None => requestNextCommand(player)
+        }
+    }
+
+    def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command = {
+        println(s"Waiting for ${player.name}")
+        factory.create(player, reader.readLine) match {
+            case Some(command: DiscardTile) => requestCallCommand(player, groupedTiles)
+            case Some(command) => command
+            case None => requestCallCommand(player, groupedTiles)
+        }
+    }
+
+    def renderOutput(player: Player, message: String) {
+        writer.print(message)
+        writer.flush
     }
 }
 
@@ -69,6 +110,10 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
         }
 
         SkipCommand()
+    }
+
+    def renderOutput(player: Player, message: String) {
+        print(message)
     }
 
     private def findKongs(groups: TileGroups): Option[Seq[Tile]] = {
