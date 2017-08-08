@@ -5,7 +5,7 @@ class InvalidCommandException extends Exception("Invalid command given")
 class CommandFactory {
 
     def create(player: Player, line: String): Option[Command] = {
-        val command = cleanInput(line) match {
+        val command: Command = cleanInput(line) match {
             case Array("pung", tileA, tileB, tileC) => CallPung(player, findTiles(player, tileA, tileB, tileC))
             case Array("kong", tileA, tileB, tileC, tileD) => CallKong(player, findTiles(player, tileA, tileB, tileC, tileD))
             case Array("chow", tileA, tileB, tileC) => CallChow(player, findTiles(player, tileA, tileB, tileC))
@@ -15,7 +15,7 @@ class CommandFactory {
             case Array("last") => LastDiscardedTile(player)
             case Array("discard", index) => DiscardTile(player, index.toInt)
             case Array("skip") => SkipCommand()
-            case Array("exit") => ExitGame
+            case Array("exit") => ExitGame()
             case _ => null
         }
 

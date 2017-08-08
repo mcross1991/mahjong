@@ -55,9 +55,5 @@ case class Player(name: String, score: Score, controller: InputController) {
         val grouped = (tiles ++ Seq(lastTile)).groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
         controller.requestCallCommand(this, grouped)
     }
-
-    def renderOutput(message: String) {
-        controller.renderOutput(this, message)
-    }
 }
 

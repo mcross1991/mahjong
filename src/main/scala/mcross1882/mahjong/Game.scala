@@ -2,7 +2,7 @@ package mcross1882.mahjong
 
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
-class Game {
+class Game(players: Seq[Player]) {
 
     type TileBuffer = ArrayBuffer[Tile]
 
@@ -10,11 +10,11 @@ class Game {
 
     private val discardedTiles = new TileBuffer
 
-    private var currentPlayer: Option[Player] = None
+    private var currentPlayer: Int = 0
 
     private var isGameFinished: Boolean = false
 
-    private var isWaiting: Boolean = false
+    private var isWaiting: Boolean = true
 
     def dealTile(): Tile = {
         if (availableTiles.isEmpty) {
@@ -31,9 +31,21 @@ class Game {
     }
 
     def setCurrentPlayer(player: Player) {
-        currentPlayer = Some(player)
+        currentPlayer = players.indexOf(player)
         isWaiting = true
     }
+
+    def gotoNextPlayer() {
+        if (currentPlayer < players.length) {
+            currentPlayer += 1
+        } else {
+            currentPlayer = 0
+        }
+    }
+
+    def allPlayers(): Seq[Player] = players
+
+    def getCurrentPlayer(): Player = players(currentPlayer)
 
     def isWaitingForPlayer(): Boolean = isWaiting
 
