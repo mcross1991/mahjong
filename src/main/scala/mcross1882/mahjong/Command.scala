@@ -174,7 +174,6 @@ case class DiscardTile(player: Player, tileIndex: Int) extends Command {
         game.discardTile(tile)
         game.stopWaiting
         println(s"${player.name} discards $tile")
-        
     }
 }
 

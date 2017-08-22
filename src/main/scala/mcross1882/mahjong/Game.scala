@@ -2,6 +2,8 @@ package mcross1882.mahjong
 
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
+class NoMoreTilesException extends Exception("No more tiles!")
+
 class Game(players: Seq[Player]) {
 
     type TileBuffer = ArrayBuffer[Tile]
@@ -18,7 +20,7 @@ class Game(players: Seq[Player]) {
 
     def dealTile(): Tile = {
         if (availableTiles.isEmpty) {
-            throw new Exception("No more tiles!")
+            throw new NoMoreTilesException()
         }
 
         val tile = availableTiles.head

@@ -2,6 +2,8 @@ package mcross1882.mahjong
 
 import scala.collection.mutable.ArrayBuffer
 
+class MissingTileException extends Exception("The selected tile does not exist")
+
 object Player {
 
     def create(name: String, factory: CommandFactory): Player = Player(name, createScore, new ConsoleController(factory))
@@ -28,6 +30,10 @@ case class Player(name: String, score: Score, controller: InputController) {
     }
 
     def giveTile(tileIndex: Int): Tile = {
+        if (!tileBuffer.isDefinedAt(tileIndex)) {
+            throw new MissingTileException()
+        }
+
         val tile = tileBuffer(tileIndex)
         tileBuffer.remove(tileIndex)
         tile
