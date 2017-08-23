@@ -1,4 +1,4 @@
-package mcross1882.mahjong
+package mahjong
 
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 

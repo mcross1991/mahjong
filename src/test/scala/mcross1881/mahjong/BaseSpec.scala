@@ -1,4 +1,4 @@
-package mcross1882.mahjong
+package mahjong
 package test
 
 import org.scalatest.{FlatSpec, Matchers}
