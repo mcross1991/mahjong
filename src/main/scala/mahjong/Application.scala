@@ -10,16 +10,15 @@ object Application {
             Player.createBot("Player D")
         ))
 
-        restartSession(session)
+        startSession(session)
     }
 
-    private def restartSession(session: Session) {
+    private def startSession(session: Session) {
         try {
             session.start
         } catch {
             case e: Exception => {
                 println(s"Whoops! ${e.getMessage}")
-                restartSession(session)
             }
         }
     }

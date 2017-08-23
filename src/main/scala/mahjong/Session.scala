@@ -10,7 +10,7 @@ class Session(players: Seq[Player]) {
 
     private var isStarted: Boolean = false
 
-    if (players.length >= MAX_PLAYERS) {
+    if (players.length > MAX_PLAYERS) {
         throw new TooManyPlayersException()
     }
 
