@@ -1,18 +1,27 @@
 package mahjong
 
-import scala.collection.mutable.ArrayBuffer
+class TooManyPlayersException extends Exception("Cannot register anymore players, 4 is the max")
 
-class Session {
+class SessionAlreadyStartedException extends Exception("Session is already started")
+
+class Session(players: Seq[Player]) {
+
+    private val MAX_PLAYERS = 4
+
+    private var isStarted: Boolean = false
+
+    if (players.length >= MAX_PLAYERS) {
+        throw new TooManyPlayersException()
+    }
 
     def start() {
-        val players = Seq(
-            Player.create("Player A"),
-            Player.createBot("Player B"),
-            Player.createBot("Player C"),
-            Player.createBot("Player D")
-        )
+        if (isStarted) {
+            throw new SessionAlreadyStartedException()
+        }
 
-        val game = new Game(players)
+        isStarted = true
+
+        val game = new Game(players.toSeq)
 
         DealStartingTiles().execute(game)
 

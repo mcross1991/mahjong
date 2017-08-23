@@ -3,7 +3,14 @@ package mahjong
 object Application {
 
     def main(args: Array[String]) {
-        restartSession(new Session)
+        val session = new Session(Seq(
+            Player.create("Player A"),
+            Player.createBot("Player B"),
+            Player.createBot("Player C"),
+            Player.createBot("Player D")
+        ))
+
+        restartSession(session)
     }
 
     private def restartSession(session: Session) {
