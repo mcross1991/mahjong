@@ -20,7 +20,7 @@ object Tile {
     val CATEGORY_FENG = "风"
 
     def isSuitedTile(tile: Tile): Boolean = {
-        tile.category == CATEGORY_WAN || tile.category == CATEGORY_FENG || tile.category == CATEGORY_TIAO || tile.category == CATEGORY_TONG
+        tile.category == CATEGORY_WAN || tile.category == CATEGORY_TIAO || tile.category == CATEGORY_TONG
     }
 
     def startingTiles(): ArrayBuffer[Tile] = {

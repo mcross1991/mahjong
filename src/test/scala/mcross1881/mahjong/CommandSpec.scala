@@ -30,7 +30,7 @@ class CommandSpec extends BaseSpec {
     "AskPlayer" should "ask the current player for the next command" in {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
         AskPlayer(player).execute(game)
         game.isFinished should be(false)
     }
@@ -38,21 +38,17 @@ class CommandSpec extends BaseSpec {
     it should "let the player call mahjong after the last command" in {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
         AskPlayer(player).execute(game)
         game.isFinished should be(true)
-    }
-
-    "AskOtherPlayers" should "ask players other than the current player if they want to take the last discarded tile" in {
-
     }
 
     "CheckDiscardedTile" should "ask the player if they want to use the last discarded tile to form a hand" in {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
-        game.discardTile(Tile("二", Tile.CATEGORY_TIAO))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
+        game.discardTile(Tile(Tile.CATEGORY_TIAO, "二"))
         CheckDiscardedTile(player).execute(game)
         game.isFinished should be(false)
     }
@@ -60,9 +56,9 @@ class CommandSpec extends BaseSpec {
     it should "allow a player to call mahjong after they check the tiles" in {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
-        player.takeTile(Tile("二", Tile.CATEGORY_TIAO))
-        game.discardTile(Tile("二", Tile.CATEGORY_TIAO))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
+        player.takeTile(Tile(Tile.CATEGORY_TIAO, "二"))
+        game.discardTile(Tile(Tile.CATEGORY_TIAO, "二"))
         CheckDiscardedTile(player).execute(game)
         game.isFinished should be(true)
     }
@@ -101,7 +97,7 @@ class CommandSpec extends BaseSpec {
     "DiscardTile" should "discard a players tile into the games discared pile" in {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
-        val tile = Tile("二", Tile.CATEGORY_TIAO)
+        val tile =Tile(Tile.CATEGORY_TIAO, "二")
         player.takeTile(tile)
         DiscardTile(player, 0).execute(game)
         player.tiles.length should be(0)
@@ -124,9 +120,9 @@ class CommandSpec extends BaseSpec {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
         val tiles = Seq(
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO)
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二")
         )
 
         tiles.foreach(t => player.takeTile(t))
@@ -142,9 +138,9 @@ class CommandSpec extends BaseSpec {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
         val tiles = Seq(
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("三", Tile.CATEGORY_TIAO)
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "三")
         )
 
         tiles.foreach(t => player.takeTile(t))
@@ -160,10 +156,10 @@ class CommandSpec extends BaseSpec {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
         val tiles = Seq(
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO)
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二")
         )
 
         tiles.foreach(t => player.takeTile(t))
@@ -179,10 +175,10 @@ class CommandSpec extends BaseSpec {
         val player = fakePlayer("demo_a")
         val game = new Game(Seq(player))
         val tiles = Seq(
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("二", Tile.CATEGORY_TIAO),
-            Tile("三", Tile.CATEGORY_TIAO)
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "三")
         )
 
         tiles.foreach(t => player.takeTile(t))
@@ -190,10 +186,46 @@ class CommandSpec extends BaseSpec {
         CallKong(player, tiles).execute(game)
 
         player.tiles.length should be(4)
-        player.score.pungs.length should be(0)
+        player.score.kongs.length should be(0)
         game.lastDiscardedTile should be(None)
     }
 
+    "CallChow" should "let the player call chow if they have a linear set of 3" in {
+        val player = fakePlayer("demo_a")
+        val game = new Game(Seq(player))
+        val tiles = Seq(
+           Tile(Tile.CATEGORY_TIAO, "一"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "三")
+        )
+
+        tiles.foreach(t => player.takeTile(t))
+
+        CallChow(player, tiles).execute(game)
+
+        player.tiles.length should be(1)
+        player.score.chows.length should be(1)
+        game.lastDiscardedTile should be(None)
+    }
+
+    it should "not add any score if the tile set was not a chow" in {
+        val player = fakePlayer("demo_a")
+        val game = new Game(Seq(player))
+        val tiles = Seq(
+           Tile(Tile.CATEGORY_TIAO, "一"),
+           Tile(Tile.CATEGORY_TIAO, "二"),
+           Tile(Tile.CATEGORY_TIAO, "二")
+        )
+
+        tiles.foreach(t => player.takeTile(t))
+
+        CallChow(player, tiles).execute(game)
+
+        player.tiles.length should be(3)
+        player.score.chows.length should be(0)
+        game.lastDiscardedTile should be(None)
+    }
+    
     private def fakeGame(): Game = new Game(Seq(fakePlayer("demo_a"), fakePlayer("demo_b")))
 
     private def fakePlayer(name: String): Player = new Player(name, Player.createScore, new TestController)

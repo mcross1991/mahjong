@@ -22,42 +22,42 @@ case class ExitGame() extends Command {
 case class ShowTiles(player: Player, tiles: Seq[Tile], hideIndicies: Boolean) extends Command {
 
     def execute(game: Game) {
-        printTiles()
+        printTiles(game)
     }
 
-    private def printTiles() {
+    private def printTiles(game: Game) {
         val numberOfTiles = tiles.length
 
         for (index <- 0 until numberOfTiles) {
-            print(" +--+ ")
+            game.render(" +--+ ")
         }
-        println
+        game.renderLine("")
 
         for (index <- 0 until numberOfTiles) {
-            print(s" |${tiles(index).value}| ")
+            game.render(s" |${tiles(index).value}| ")
         }
-        println
+        game.renderLine("")
 
         for (index <- 0 until numberOfTiles) {
-            print(" |--| ")
+            game.render(" |--| ")
         }
-        println
+        game.renderLine("")
 
         for (index <- 0 until numberOfTiles) {
-            print(s" |${tiles(index).category}| ")
+            game.render(s" |${tiles(index).category}| ")
         }
-        println
+        game.renderLine("")
 
         for (index <- 0 until numberOfTiles) {
-            print(" +--+ ")
+            game.render(" +--+ ")
         }
-        println
+        game.renderLine("")
 
         if (!hideIndicies) {
             for (index <- 0 until numberOfTiles) {
-                print(f"  ${index}%2d  ")
+                game.render(f"  ${index}%2d  ")
             }
-            println
+            game.renderLine("")
         }
     }
 }
@@ -66,25 +66,25 @@ case class ShowScore(player: Player) extends Command {
 
     def execute(game: Game) {
         val header = s"${player.name} Score"
-        println(header)
-        println("-" * header.length)
-        println
+        game.renderLine(header)
+        game.renderLine("-" * header.length)
+        game.renderLine("")
         listScoreTiles(game, "kong", player.score.kongs)
-        println
+        game.renderLine("")
         listScoreTiles(game, "pung", player.score.pungs)
-        println
+        game.renderLine("")
         listScoreTiles(game, "chow", player.score.chows)
-        println
+        game.renderLine("")
     }
 
     private def listScoreTiles(game: Game, setName: String, list: Seq[Seq[Tile]]) {
         if (list.length > 0) {
-            println(s"${setName.capitalize}s (${list.length})")
+            game.renderLine(s"${setName.capitalize}s (${list.length})")
             for (item <- list) {
                 ShowTiles(player, item, true).execute(game)
             }
         } else {
-            println(s"No ${setName}s")
+            game.renderLine(s"No ${setName}s")
         } 
     }
 }
@@ -104,7 +104,7 @@ case class AskPlayer(player: Player) extends Command {
         }
 
         if (player.canCallMahjong) {
-            println(s"${player.name} calls mahjong!")
+            game.renderLine(s"${player.name} calls mahjong!")
             game.finish
         }
     }
@@ -126,7 +126,7 @@ case class CheckDiscardedTile(player: Player) extends Command {
     def execute(game: Game) {
         game.lastDiscardedTile match {
             case Some(lastTile) => checkIfPlayerCanCall(lastTile, game)
-            case None => println("No tiles have been discarded yet, skipping")
+            case None => game.renderLine("No tiles have been discarded yet, skipping")
         }
     }
 
@@ -140,7 +140,7 @@ case class CheckDiscardedTile(player: Player) extends Command {
         }
 
         if (player.canCallMahjong) {
-            println(s"${player.name} calls mahjong!")
+            game.renderLine(s"${player.name} calls mahjong!")
             game.finish
         }
     }
@@ -163,7 +163,7 @@ case class DealTile(player: Player) extends Command {
     def execute(game: Game) {
         val tile = game.dealTile
         player.takeTile(tile)
-        println(s"${player.name} takes $tile")
+        game.renderLine(s"${player.name} takes $tile")
     }
 }
 
@@ -173,7 +173,7 @@ case class DiscardTile(player: Player, tileIndex: Int) extends Command {
         val tile = player.giveTile(tileIndex)
         game.discardTile(tile)
         game.stopWaiting
-        println(s"${player.name} discards $tile")
+        game.renderLine(s"${player.name} discards $tile")
     }
 }
 
@@ -182,10 +182,10 @@ case class LastDiscardedTile(player: Player) extends Command {
     def execute(game: Game) {
         game.lastDiscardedTile match {
             case Some(tile) => {
-                println(s"Last discarded tile was")
+                game.renderLine(s"Last discarded tile was")
                 (new ShowTiles(player, Seq(tile), true)).execute(game)
             }
-            case None => println("No tile has been discard yet")
+            case None => game.renderLine("No tile has been discard yet")
         }
     }
 }
@@ -194,13 +194,13 @@ case class CallPung(player: Player, selectedTiles: Seq[Tile]) extends Command wi
 
     def execute(game: Game) {
         if (isPung(selectedTiles)) {
-            println(s"${player.name} calls pung! (${selectedTiles.mkString(",")})")
+            game.renderLine(s"${player.name} calls pung! (${selectedTiles.mkString(",")})")
             player.score.pungs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             DealTile(player).execute(game)
         } else {
-            println("Combination is not a pung")
+            game.renderLine("Combination is not a pung")
         }
     }
 
@@ -211,13 +211,13 @@ case class CallKong(player: Player, selectedTiles: Seq[Tile]) extends Command wi
 
     def execute(game: Game) {
         if (isKong(selectedTiles)) {
-            println(s"${player.name} calls kong! (${selectedTiles.mkString(",")})")
+            game.renderLine(s"${player.name} calls kong! (${selectedTiles.mkString(",")})")
             player.score.kongs += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             DealTile(player).execute(game)
         } else {
-            println("Combination is not a kong")
+            game.renderLine("Combination is not a kong")
         }
     }
 
@@ -228,13 +228,13 @@ case class CallChow(player: Player, selectedTiles: Seq[Tile]) extends Command wi
 
     def execute(game: Game) {
         if (isChow(selectedTiles)) {
-            println(s"${player.name} calls chow! (${selectedTiles.mkString(",")})")
+            game.renderLine(s"${player.name} calls chow! (${selectedTiles.mkString(",")})")
             player.score.chows += selectedTiles
             player.removeTiles(selectedTiles)
             game.setCurrentPlayer(player)
             DealTile(player).execute(game)
         } else {
-            println("Combination is not a chow")
+            game.renderLine("Combination is not a chow")
         }
     }
 

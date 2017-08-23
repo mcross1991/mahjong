@@ -68,4 +68,12 @@ class Game(players: Seq[Player]) {
         isGameFinished = false
         isWaiting = false
     }
+
+    def render(message: String) {
+        players.foreach(_.render(message))
+    }
+
+    def renderLine(message: String) {
+        players.foreach(_.renderLine(message))
+    }
 }

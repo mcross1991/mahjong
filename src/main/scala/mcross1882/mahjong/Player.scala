@@ -6,18 +6,20 @@ class MissingTileException extends Exception("The selected tile does not exist")
 
 object Player {
 
-    def create(name: String, factory: CommandFactory): Player = Player(name, createScore, new ConsoleController(factory))
+    private val factory = new CommandFactory
 
-    def createRemote(name: String, factory: CommandFactory): Player = Player(name, createScore, new SocketController(factory))
+    def create(name: String): Player = Player(name, createScore, new ConsoleController(factory))
 
-    def createBot(name: String, factory: CommandFactory): Player = Player(name, createScore, new BotController(factory))
+    def createRemote(name: String, port: Int): Player = Player(name, createScore, new SocketController(factory, port))
+
+    def createBot(name: String): Player = Player(name, createScore, new BotController(factory))
 
     def createScore(): Score = new Score(new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]], new ArrayBuffer[Seq[Tile]])
 }
 
 case class Score(kongs: ArrayBuffer[Seq[Tile]], pungs: ArrayBuffer[Seq[Tile]], chows: ArrayBuffer[Seq[Tile]])
 
-case class Player(name: String, score: Score, controller: InputController) {
+case class Player(name: String, score: Score, controller: Controller) {
 
     private val tileBuffer = new ArrayBuffer[Tile]
 
@@ -60,6 +62,14 @@ case class Player(name: String, score: Score, controller: InputController) {
     def checkLastTile(lastTile: Tile): Command = {
         val grouped = (tiles ++ Seq(lastTile)).groupBy(_.category).map(_._2.sortBy(_.intValue)).toSeq
         controller.requestCallCommand(this, grouped)
+    }
+
+    def render(message: String) {
+        controller.render(this, message)
+    }
+
+    def renderLine(message: String) {
+        controller.renderLine(this, message)
     }
 }
 

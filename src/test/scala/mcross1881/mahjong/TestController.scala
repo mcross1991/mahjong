@@ -1,11 +1,13 @@
 package mcross1882.mahjong
 package test
 
-class TestController extends InputController {
+class TestController extends Controller {
 
     def requestNextCommand(player: Player): Command = SkipCommand()
 
     def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command = SkipCommand()
 
-    def renderOutput(player: Player, message: String) {}
+    def render(player: Player, message: String) {}
+
+    def renderLine(player: Player, message: String) {}
 }

@@ -4,17 +4,19 @@ import scala.io.StdIn
 import java.io.{InputStreamReader, BufferedReader, PrintWriter}
 import java.net.{ServerSocket, Socket}
 
-trait InputController {
+trait Controller {
 
     def requestNextCommand(player: Player): Command
 
     def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command
 
-    def renderOutput(player: Player, message: String)
+    def render(player: Player, message: String)
+
+    def renderLine(player: Player, message: String)
 }
 
 
-class ConsoleController(factory: CommandFactory) extends InputController {
+class ConsoleController(factory: CommandFactory) extends Controller {
 
     def requestNextCommand(player: Player): Command = {
         factory.create(player, StdIn.readLine(s"${player.name}> ")) match {
@@ -31,14 +33,18 @@ class ConsoleController(factory: CommandFactory) extends InputController {
         }
     }
 
-    def renderOutput(player: Player, message: String) {
+    def render(player: Player, message: String) {
         print(message)
+    }
+
+    def renderLine(player: Player, message: String) {
+        println(message)
     }
 }
 
-class SocketController(factory: CommandFactory) extends InputController {
+class SocketController(factory: CommandFactory, port: Int) extends Controller {
 
-    private val server = new ServerSocket(8888)
+    private val server = new ServerSocket(port)
 
     private val socket: Socket = server.accept
 
@@ -48,6 +54,7 @@ class SocketController(factory: CommandFactory) extends InputController {
 
     def requestNextCommand(player: Player): Command = {
         println(s"Waiting for ${player.name}")
+        writePrompt(player)
         factory.create(player, reader.readLine) match {
             case Some(command) => command
             case None => requestNextCommand(player)
@@ -56,6 +63,7 @@ class SocketController(factory: CommandFactory) extends InputController {
 
     def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command = {
         println(s"Waiting for ${player.name}")
+        writePrompt(player)
         factory.create(player, reader.readLine) match {
             case Some(command: DiscardTile) => requestCallCommand(player, groupedTiles)
             case Some(command) => command
@@ -63,13 +71,23 @@ class SocketController(factory: CommandFactory) extends InputController {
         }
     }
 
-    def renderOutput(player: Player, message: String) {
+    def render(player: Player, message: String) {
         writer.print(message)
+        writer.flush
+    }
+
+    def renderLine(player: Player, message: String) {
+        writer.println(message)
+        writer.flush
+    }
+
+    private def writePrompt(player: Player) {
+        writer.print(s"${player.name}> ")
         writer.flush
     }
 }
 
-class BotController(factory: CommandFactory) extends InputController with MatchingTileFinder {
+class BotController(factory: CommandFactory) extends Controller with MatchingTileFinder {
 
     type TileGroups = Seq[Seq[Tile]]
 
@@ -112,10 +130,14 @@ class BotController(factory: CommandFactory) extends InputController with Matchi
         SkipCommand()
     }
 
-    def renderOutput(player: Player, message: String) {
-        print(message)
+    def render(player: Player, message: String) {
+        // noop
     }
 
+    def renderLine(player: Player, message: String) {
+        // noop
+    }
+    
     private def findKongs(groups: TileGroups): Option[Seq[Tile]] = {
         groups.map(x => extractMatchingSet(x, 4)).filter(!_.isEmpty).headOption
     }
