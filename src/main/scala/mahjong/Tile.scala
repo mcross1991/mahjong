@@ -1,3 +1,10 @@
+/**
+  * Copyright (C) 2017-2018 the original author or authors.
+  * See the LICENSE file distributed with this work for additional
+  * information regarding copyright ownership.
+  *
+  * @author Matthew Cross <github.com/mcross1991>
+  */
 package mahjong
 
 import scala.collection.mutable.ArrayBuffer
@@ -12,6 +19,8 @@ case class Tile(category: String, value: String) {
 
 object Tile {
 
+    val NUMBER_OF_TILES_PER_GROUP = 4
+
     val NUMERALS = Seq("一", "二", "三", "四", "五", "六", "七", "八", "九")
     val DIRECTIONS = Seq("北", "东", "南", "西")
     val CATEGORY_TIAO = "条"
@@ -25,23 +34,25 @@ object Tile {
 
     def startingTiles(): ArrayBuffer[Tile] = {
         val buffer = new ArrayBuffer[Tile]
-        buffer ++= Seq.fill(4)(Tile("中", "红"))
-        buffer ++= Seq.fill(4)(Tile("发", "青"))
-        buffer ++= Seq.fill(4)(Tile("板", "白"))
-        tileRange(CATEGORY_TIAO, NUMERALS, buffer)
-        tileRange(CATEGORY_WAN, NUMERALS, buffer)
-        tileRange(CATEGORY_TONG, NUMERALS, buffer)
-        tileRange(CATEGORY_FENG, DIRECTIONS, buffer)
+        buffer ++= createTileGroup(Tile("中", "红"))
+        buffer ++= createTileGroup(Tile("发", "青"))
+        buffer ++= createTileGroup(Tile("板", "白"))
+        createTileRange(CATEGORY_TIAO, NUMERALS, buffer)
+        createTileRange(CATEGORY_WAN, NUMERALS, buffer)
+        createTileRange(CATEGORY_TONG, NUMERALS, buffer)
+        createTileRange(CATEGORY_FENG, DIRECTIONS, buffer)
         Random.shuffle(buffer)
     }
 
-    private def tileRange(category: String, values: Seq[String], buffer: ArrayBuffer[Tile]) {
+    private def createTileRange(category: String, values: Seq[String], buffer: ArrayBuffer[Tile]) {
         for (value <- values) {
-            for (repeat <- 0 until 4) {
+            for (repeat <- 0 until NUMBER_OF_TILES_PER_GROUP) {
                 buffer.append(Tile(category, value))
             }
         }
     }
+
+    private def createTileGroup(tile: Tile): Seq[Tile] = Seq.fill(NUMBER_OF_TILES_PER_GROUP)(tile)
 }
 
 

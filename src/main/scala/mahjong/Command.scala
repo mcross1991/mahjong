@@ -1,3 +1,10 @@
+/**
+  * Copyright (C) 2017-2018 the original author or authors.
+  * See the LICENSE file distributed with this work for additional
+  * information regarding copyright ownership.
+  *
+  * @author Matthew Cross <github.com/mcross1991>
+  */
 package mahjong
 
 trait Command {
@@ -85,7 +92,7 @@ case class ShowScore(player: Player) extends Command {
             }
         } else {
             game.renderLine(s"No ${setName}s")
-        } 
+        }
     }
 }
 
@@ -98,7 +105,7 @@ case class SetNextPlayer(player: Player) extends Command {
 
 case class AskPlayer(player: Player) extends Command {
 
-    def execute(game: Game) { 
+    def execute(game: Game) {
         while (game.isWaitingForPlayer) {
             player.nextCommand.execute(game)
         }

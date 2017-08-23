@@ -1,3 +1,10 @@
+/**
+  * Copyright (C) 2017-2018 the original author or authors.
+  * See the LICENSE file distributed with this work for additional
+  * information regarding copyright ownership.
+  *
+  * @author Matthew Cross <github.com/mcross1991>
+  */
 package mahjong
 
 object Application {
@@ -18,7 +25,7 @@ object Application {
             session.start
         } catch {
             case e: Exception => {
-                println(s"Whoops! ${e.getMessage}")
+                e.printStackTrace
             }
         }
     }

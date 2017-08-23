@@ -1,3 +1,10 @@
+/**
+  * Copyright (C) 2017-2018 the original author or authors.
+  * See the LICENSE file distributed with this work for additional
+  * information regarding copyright ownership.
+  *
+  * @author Matthew Cross <github.com/mcross1991>
+  */
 package mahjong
 
 import scala.io.StdIn
@@ -34,11 +41,11 @@ class ConsoleController(factory: CommandFactory) extends Controller {
     }
 
     def render(player: Player, message: String) {
-        print(message)
+        print(message) // scalastyle:ignore
     }
 
     def renderLine(player: Player, message: String) {
-        println(message)
+        println(message) // scalastyle:ignore
     }
 }
 
@@ -53,7 +60,6 @@ class SocketController(factory: CommandFactory, port: Int) extends Controller {
     private val writer: PrintWriter = new PrintWriter(socket.getOutputStream)
 
     def requestNextCommand(player: Player): Command = {
-        println(s"Waiting for ${player.name}")
         writePrompt(player)
         factory.create(player, reader.readLine) match {
             case Some(command) => command
@@ -62,7 +68,6 @@ class SocketController(factory: CommandFactory, port: Int) extends Controller {
     }
 
     def requestCallCommand(player: Player, groupedTiles: Seq[Seq[Tile]]): Command = {
-        println(s"Waiting for ${player.name}")
         writePrompt(player)
         factory.create(player, reader.readLine) match {
             case Some(command: DiscardTile) => requestCallCommand(player, groupedTiles)
@@ -137,7 +142,7 @@ class BotController(factory: CommandFactory) extends Controller with MatchingTil
     def renderLine(player: Player, message: String) {
         // noop
     }
-    
+
     private def findKongs(groups: TileGroups): Option[Seq[Tile]] = {
         groups.map(x => extractMatchingSet(x, 4)).filter(!_.isEmpty).headOption
     }
@@ -152,7 +157,7 @@ class BotController(factory: CommandFactory) extends Controller with MatchingTil
 
     private def findSmallestTile(player: Player, groups: TileGroups): Int = {
         var smallestTile: Tile = groups.head.head
-        var smallestValue: Int = 4        
+        var smallestValue: Int = 4
         for (index <- 0 until groups.length) {
             if (groups(index).length < smallestValue) {
                 smallestTile = groups(index).head
