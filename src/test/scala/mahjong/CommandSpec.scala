@@ -1,3 +1,10 @@
+/**
+  * Copyright (C) 2017-2018 the original author or authors.
+  * See the LICENSE file distributed with this work for additional
+  * information regarding copyright ownership.
+  *
+  * @author Matthew Cross <github.com/mcross1991>
+  */
 package mahjong
 package test
 
@@ -225,7 +232,7 @@ class CommandSpec extends BaseSpec {
         player.score.chows.length should be(0)
         game.lastDiscardedTile should be(None)
     }
-    
+
     private def fakeGame(): Game = new Game(Seq(fakePlayer("demo_a"), fakePlayer("demo_b")))
 
     private def fakePlayer(name: String): Player = new Player(name, Player.createScore, new TestController)
